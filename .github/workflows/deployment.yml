@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Use the input environment name
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.event.inputs.environment || 'prd' }}
 
     env:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
@@ -32,7 +32,7 @@ jobs:
       SERVICE_NAME: "test-tim-service" # Replace with your service name
       REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
       COMMIT_SHA: ${{ github.sha }}
-      DEPLOY_ENV: ${{ github.environment.name }}
+      DEPLOY_ENV: ${{ github.event.inputs.environment || 'prd' }}
 
     steps:
       - name: Checkout code
