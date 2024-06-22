@@ -1,36 +1,43 @@
-# This is a basic workflow to help you get started with Actions
+name: CI/CD Pipeline
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build_and_deploy:
     runs-on: ubuntu-latest
+    env:
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_BETA_COMMANDS_ENABLED: 1
+      DD_SITE: datadoghq.com # or datadoghq.eu
+      DD_GITHUB_JOB_NAME: Deploy to Production
+      SERVICE_NAME: "test-tim-service" # Replace with your service name
+      REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
+      COMMIT_SHA: ${{ github.sha }}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Download and prepare datadog-ci CLI
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          curl -L --fail "https://github.com/DataDog/datadog-ci/releases/latest/download/datadog-ci_linux-x64" --output "/usr/local/bin/datadog-ci" && chmod +x /usr/local/bin/datadog-ci
+
+      - name: Mark deployment in Datadog
+        run: |
+          START_TIME=$(date +%s)
+          datadog-ci deployment mark --env prod --revision 1.0.0 --tags team:backend --tags reason:scheduled
+          END_TIME=$(date +%s)
+
+      - name: Submit DORA Metrics to Datadog
+        run: |
+          datadog-ci dora deployment submit \
+            --service $SERVICE_NAME \
+            --started-at $START_TIME \
+            --finished-at $END_TIME \
+            --repository-url $REPOSITORY_URL \
+            --commit-sha $COMMIT_SHA \
+            --env prod
