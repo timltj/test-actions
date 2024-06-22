@@ -2,6 +2,17 @@ name: CI/CD Pipeline
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "prd"
+        type: choice
+        options:
+          - dev
+          - uat
+          - preprd
+          - prd
   push:
     branches:
       - master
@@ -9,6 +20,10 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
+    # Use the input environment name
+    environment: ${{ inputs.environment }}
+
     env:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
       DD_BETA_COMMANDS_ENABLED: 1
@@ -17,6 +32,7 @@ jobs:
       SERVICE_NAME: "test-tim-service" # Replace with your service name
       REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
       COMMIT_SHA: ${{ github.sha }}
+      DEPLOY_ENV: ${{ github.event.inputs.environment }}
 
     steps:
       - name: Checkout code
@@ -29,15 +45,15 @@ jobs:
       - name: Mark deployment in Datadog
         run: |
           START_TIME=$(date +%s)
-          datadog-ci deployment mark --env prod --revision 1.0.0 --tags team:backend --tags reason:scheduled
+          datadog-ci deployment mark --env $DEPLOY_ENV --revision 1.0.0 --tags team:backend --tags reason:scheduled
           END_TIME=$(date +%s)
 
       - name: Submit DORA Metrics to Datadog
         run: |
-          datadog-ci dora deployment submit \
+          datadog-ci dora deployment \
             --service $SERVICE_NAME \
             --started-at $START_TIME \
             --finished-at $END_TIME \
             --repository-url $REPOSITORY_URL \
             --commit-sha $COMMIT_SHA \
-            --env prod
+            --env $DEPLOY_ENV
