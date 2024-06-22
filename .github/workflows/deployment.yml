@@ -33,8 +33,6 @@ jobs:
       REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
       COMMIT_SHA: ${{ github.sha }}
       DEPLOY_ENV: ${{ github.event.inputs.environment || 'prd' }}
-      START_TIME: ${{ steps.set_start_time.outputs.start_time }}
-      END_TIME: ${{ steps.set_start_time.outputs.end_time }}
 
     steps:
       - name: Checkout code
@@ -50,10 +48,12 @@ jobs:
 
       - name: Submit DORA Metrics to Datadog
         run: |
+          start_time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          end_time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           datadog-ci dora deployment \
             --service $SERVICE_NAME \
-            --started-at $START_TIME \
-            --finished-at $END_TIME \
+            --started-at "$start_time" \
+            --finished-at "$end_time" \
             --repository-url $REPOSITORY_URL \
             --commit-sha $COMMIT_SHA \
             --env $DEPLOY_ENV
