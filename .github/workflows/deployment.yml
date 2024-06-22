@@ -48,12 +48,10 @@ jobs:
 
       - name: Submit DORA Metrics to Datadog
         run: |
-          start_time=$(date -u '-10 seconds' +'%Y-%m-%dT%H:%M:%SZ')
-          end_time=$(date -u -d +'%Y-%m-%dT%H:%M:%SZ')
+          start_time=$(date -u -d '-10 seconds' +'%Y-%m-%dT%H:%M:%SZ') # Simulating a deploy start time 10 seconds ago
           datadog-ci dora deployment \
             --service $SERVICE_NAME \
             --started-at "$start_time" \
-            --finished-at "$end_time" \
             --git-repository-url $REPOSITORY_URL \
             --git-commit-sha $COMMIT_SHA \
             --env $DEPLOY_ENV
