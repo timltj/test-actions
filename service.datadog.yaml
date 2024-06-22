@@ -1,0 +1,16 @@
+schema-version: v2.2
+dd-service: test-tim-service
+team: tim-team
+application: tim-shopping-app
+tier: "1"
+type: custom
+links:
+  - name: Source
+    type: repo
+    provider: github
+    url: https://github.com/timltj/test-actions
+tags:
+  - bg:ips
+  - team:are
+ci-pipeline-fingerprints:
+  - fq8lCdOFwQlf
