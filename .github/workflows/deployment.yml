@@ -54,6 +54,6 @@ jobs:
             --service $SERVICE_NAME \
             --started-at "$start_time" \
             --finished-at "$end_time" \
-            --repository-url $REPOSITORY_URL \
-            --commit-sha $COMMIT_SHA \
+            --git-repository-url $REPOSITORY_URL \
+            --git-commit-sha $COMMIT_SHA \
             --env $DEPLOY_ENV
