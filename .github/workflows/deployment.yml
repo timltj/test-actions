@@ -32,7 +32,7 @@ jobs:
       SERVICE_NAME: "test-tim-service" # Replace with your service name
       REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
       COMMIT_SHA: ${{ github.sha }}
-      DEPLOY_ENV: ${{ github.event.inputs.environment }}
+      DEPLOY_ENV: ${{ github.environment.name }}
 
     steps:
       - name: Checkout code
