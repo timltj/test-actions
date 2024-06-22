@@ -33,8 +33,8 @@ jobs:
       REPOSITORY_URL: "https://github.com/timltj/test-actions" # Replace with your repository URL
       COMMIT_SHA: ${{ github.sha }}
       DEPLOY_ENV: ${{ github.event.inputs.environment || 'prd' }}
-      START_TIME: $((`date +%s`)) # Corrected syntax for date command
-      END_TIME: $((START_TIME + 10)) # Adding 10 seconds to START_TIME
+      START_TIME: ${{ steps.set_start_time.outputs.start_time }}
+      END_TIME: ${{ steps.set_start_time.outputs.end_time }}
 
     steps:
       - name: Checkout code
